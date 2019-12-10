@@ -5,6 +5,7 @@
 #include <time.h>
 #include <iostream>
 #include <x86intrin.h>
+#include "util.hpp"
 
 using namespace std;
 

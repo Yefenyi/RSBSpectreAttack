@@ -1,10 +1,28 @@
-CFLAGS = -std=c++11
+CFLAGS=-std=c++11 -I /usr/local
+CC=g++
 
-PROGRAM = test.out
-SOURCE  = main.cpp
-     
-all: $(PROGRAM)
-     
-$(PROGRAM): $(SOURCE) ; g++ $(CFLAGS) -g -o $(PROGRAM) $(SOURCE)
-     
-clean: ; rm -f $(PROGRAM)
+
+TARGETS=main
+UTILS=util.o 
+
+all: $(TARGETS)
+
+$(UTILS): %.o: %.cpp %.hpp
+	$(CC) $(CFLAGS) -c $<
+
+%.o: %.cpp util.hpp
+	$(CC) $(CFLAGS)  -c $< 
+
+
+$(TARGETS): %:%.o util.o
+	$(CC) $(CFLAGS) $^ -o $@
+
+
+
+run:
+	./main
+
+.PHONY:	clean
+
+clean:
+	rm *.o $(HELPERS) $(TARGETS) 
