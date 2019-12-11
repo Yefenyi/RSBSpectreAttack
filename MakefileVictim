@@ -1,8 +1,8 @@
-CFLAGS=-std=c++11 -I /usr/local
+CFLAGS=-std=c++11 -I /usr/local -g
 CC=g++
 
 
-TARGETS=main
+TARGETS=victim
 UTILS=util.o 
 
 all: $(TARGETS)

@@ -1,12 +1,10 @@
 #include <stdio.h>
-
-// You may use memory allocators and helper functions 
-// (e.g., rand()).  You may not use system().
 #include <stdlib.h>
-#include <stdint.h>
 #include <cstdlib>
 #include <inttypes.h>
 #include <time.h>
+#include <iostream>
+#include <x86intrin.h>
 
 #ifndef UTIL_H_
 #define UTIL_H_
