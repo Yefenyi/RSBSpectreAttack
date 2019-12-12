@@ -14,7 +14,7 @@
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 CYCLES rdtsc();
-void clflush(volatile void *p);
+volatile void clflush(void *p);
 void printAccessTime(ADDR_PTR addr);
 
 #endif

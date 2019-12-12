@@ -2,7 +2,7 @@
 #include "util.hpp"
 
 /* Measure the time it takes to access a block with virtual address addr. */
-CYCLES measure_one_block_access_time(ADDR_PTR addr)
+inline CYCLES measure_one_block_access_time(ADDR_PTR addr)
 {
 	CYCLES cycles;
 
@@ -27,7 +27,7 @@ CYCLES rdtsc(){
     return ((CYCLES)hi << 32) | lo;
 }
 
-void clflush(volatile void *p){
+volatile void clflush(void *p){
     asm volatile ("clflush (%0)" :: "r"(p));
 }
 

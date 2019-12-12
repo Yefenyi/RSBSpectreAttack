@@ -40,18 +40,22 @@ using namespace std;
 
 void gadget() {
 	asm(
-		"myLabel:"
-		"pop %rax;"
 		".rept 5;"
 		"nop;"
 		".endr;"
+		"myLabel:"
+		"pop %rax;"
 		"call myLabel;"
 	);
 }
 
-int main(){
+int main(int argc, char *argv[]){
+	if (argc > 1) {
+		printf("doing nothing\n");
+		while(1) {}
+	}
+	printf("poluting rsb\n");
 	gadget();
-	// while(1) {}
 
 	// string buffer;
 	// char temp;
