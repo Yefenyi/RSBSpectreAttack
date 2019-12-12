@@ -5,6 +5,7 @@
 #include <time.h>
 #include <iostream>
 #include <x86intrin.h>
+#include <exception>
 
 #ifndef UTIL_H_
 #define UTIL_H_

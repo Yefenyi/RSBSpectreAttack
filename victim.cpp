@@ -8,13 +8,22 @@ int secretKey = 80;
 
 char array[256*512];
 
+void AddressAlignment(){
+	__asm__(
+		".rep 5000;"
+		"nop;"
+		".endr;"
+	);
+}
+
 volatile int foo(){
 	__asm__(
+		"clflush (%rsp);"
+		"clflush (%rip);"
 		"cpuid;"
 	);
 	return 0;
 }
-
 
 int main(){
 	string buffer;
@@ -28,7 +37,7 @@ int main(){
 	}
 
 	string secret = buffer;
-	temp &= secretKey; // vulneralbility
+	temp &= array[secretKey]; // vulneralbility
 
 	unsigned int repeat = 1000, acc1 = 0, acc2 = 0, dummy;
 	
@@ -39,7 +48,7 @@ int main(){
 		}
 
 		auto start = __rdtscp(&dummy);
-		temp &= secretKey;
+		temp &= array[secretKey];
 		auto end = __rdtscp(&dummy);
 		acc1 += end-start;
 
@@ -48,7 +57,7 @@ int main(){
 		end = __rdtscp(&dummy);
 		acc2 += end-start;
 
-		clflush((void*)(&secretKey));
+		clflush((void*)(&array[secretKey]));
 		clflush((void*)(&array[0]));
 	}
 

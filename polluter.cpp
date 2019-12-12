@@ -4,27 +4,43 @@ using namespace std;
 
 void AddressAlignment(){
 	__asm__(
-		".rep 1578;"
+		".rep 5434;"
 		"nop;"
 		".endr;"
 	);
 }
 
-void pollute(){
-	__asm__(
-		"pop %rdi;"
-		"pop %rdi;"
-	);
-	pollute();
+class ReturnException : public exception{
+public:
+	const char * content () const throw () {
+      return "Interrupt normal return";
+    }
+};
+
+int exceptionLayer(){
+	throw ReturnException();
+	return 0;
 }
 
-int polluteWrapper(){
-	cout<<"Start polluting RSB..."<<endl;
-	pollute();
+int polluteLayer(){
+	exceptionLayer();
+	return 0;
+}
+
+int catchLayer(){
+	try{
+		polluteLayer();
+	}catch(ReturnException& re){
+		return 1;
+	}
 	return 0; 
 }
 
 int main(){
-	polluteWrapper();
+	cout<<"Start polluting RSB..."<<endl;
+	while(true){
+		catchLayer();
+		//AddressAlignment();
+	}
 	return 0;
 }
