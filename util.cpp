@@ -31,3 +31,7 @@ void clflush(volatile void *p){
     asm volatile ("clflush (%0)" :: "r"(p));
 }
 
+void printAccessTime(ADDR_PTR addr) {
+	printf("%u\n",  
+		measure_one_block_access_time(addr));
+}
