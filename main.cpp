@@ -62,7 +62,13 @@ inline void time(int i) {
 	cout<< i <<" "<<t2-t1<<endl;
 }
 
+volatile void soo(){
+	int i=5;
+	return;
+}
+
 int main(){
+	soo();
 	int x = 2;
 	int y = addFive(x);
 
