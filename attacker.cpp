@@ -4,17 +4,17 @@
 
 using namespace std;
 
-char array[256*256];
+char array[256*512];
 
 volatile int foo(){
 	return 0;
 }
 
-volatile int goo(){
+volatile void goo(){
 	__asm__(
-		".rept 564;"
-		"nop;"
-		".endr;"
+	".rept 452;"
+	"nop;"
+	".endr"
 	);
 }
 
@@ -41,29 +41,39 @@ int speculative(){
 int main(){
 	string buffer;
 	char temp;
-	volatile int i = 0;
+	unsigned int dummy;
+	volatile int repeat = 1000;
 
-	temp &= array[0];
-	temp &= array[80];
-	temp &= array[200];
+	for(int i=0; i<8; i++){
+		auto offset = (1<<12)*(i+8);
+		temp &= array[offset];
+	}
 
+	for(int i=0; i<8; i++){
+		auto offset = (1<<12)*(i+16);
+		temp &= array[offset];
+	}
+
+	int sum = 0;
+	
 	speculative();
 
-	unsigned int dummy;
 	auto t1 = __rdtscp(&dummy);
-	temp &= array[0];
+	for(int i=0; i<8; i++){
+		auto offset = (1<<12)*(i+8);
+		temp &= array[offset];
+	}
 	auto t2 = __rdtscp(&dummy);
-	cout<<t2-t1<<endl;
+	cout<<"time diff:"<< (t2-t1)/8<<endl;
 
-	auto t3 = __rdtscp(&dummy);
-	temp &= array[80];
-	auto t4 = __rdtscp(&dummy);
-	cout<<t4-t3<<endl;
+	t1 = __rdtscp(&dummy);
+	for(int i=0; i<8; i++){
+		auto offset = (1<<12)*(i+16);
+		temp &= array[offset];
+	}
+	t2 = __rdtscp(&dummy);
+	cout<<"time diff:"<< (t2-t1)/8<<endl;
 
-	auto t5 = __rdtscp(&dummy);
-	temp &= array[200];
-	auto t6 = __rdtscp(&dummy);
-	cout<<t6-t5<<endl;
 
 	return 0;
 }
