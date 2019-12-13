@@ -1,6 +1,8 @@
 #include "util.hpp"
 #include <iostream>
 #include <fstream>
+#include <unistd.h>
+#include <sched.h>
 #define secret 1232
 #define nonsecret 21142
 
@@ -20,7 +22,7 @@ inline void timeAndFlush(ADDR_PTR addr) {
 
 volatile void spacer2() {
 	asm(
-		".rept 1000;"
+		".rept 915;"
 		"nop;"
 		".endr;"
 	);
@@ -31,6 +33,7 @@ void trickMe() {
 	ADDR_PTR address, tmp;
 
 	for (int i = 0; i < 1000; i++) {
+		sched_yield();
 		asm(
 			"mov $0x0000555555554c74,%0;" "push %0;"
 			"mov $0x0000555555554c73,%0;" "push %0;"
