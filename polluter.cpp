@@ -7,7 +7,7 @@ int temp;
 
 void AddressAlignment(){
 	__asm__(
-		".rep 20143;"
+		".rep 243;"
 		"nop;"
 		".endr;"
 	);

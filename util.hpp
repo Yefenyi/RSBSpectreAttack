@@ -6,6 +6,7 @@
 #include <iostream>
 #include <x86intrin.h>
 #include <exception>
+#include <sched.h>
 
 #ifndef UTIL_H_
 #define UTIL_H_

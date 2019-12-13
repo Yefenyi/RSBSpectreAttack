@@ -10,12 +10,13 @@ int nonSecretKey = 0;
 
 char array[256*512];
 
-void AddressAlignment(){
-	__asm__(
-		".rep 10000;"
-		"cpuid;"
-		".endr;"
-	);
+int AddressAlignment(){
+	sched_yield();
+	return 0;
+}
+
+volatile int fastReturn(){
+	return 0;
 }
 
 int main(){
@@ -32,14 +33,11 @@ int main(){
 	string secret = buffer;
 	temp &= array[secretKey*512]; // vulneralbility
 
-	unsigned int repeat = 100, acc1 = 0, acc2 = 0, dummy;
+	unsigned int repeat = 1000, acc1 = 0, acc2 = 0, dummy;
 	
 	for(int i=0; i<repeat; i++){
 
-		for(int i=0; i<4; i++){
-			AddressAlignment();
-			temp &= i;
-		}
+		AddressAlignment();
 
 		unsigned int start, end;
 
@@ -52,7 +50,6 @@ int main(){
 		temp &= array[nonSecretKey*512];
 		end = __rdtscp(&dummy);
 		acc2 += end-start;
-
 
 		clflush((void*)(&array[secretKey*512]));
 		clflush((void*)(&array[nonSecretKey*512]));
