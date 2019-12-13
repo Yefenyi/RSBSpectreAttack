@@ -58,12 +58,46 @@ void gadget() {
 }
 
 int main(int argc, char *argv[]){
-	if (argc > 1) {
-		printf("doing nothing\n");
-		while(1) {}
+	printf("Attacker Launching\n");
+
+
+	// start child process on the same console
+	pid_t pid = fork();
+
+
+	// loads the entire array
+
+	if(pid == 0){
+		// child process
+		// doing nothing, just for comparison
+		if ((argc == 2)&&(argv[1][0]=='0')) {
+			printf("doing nothing\n");
+			while(1) {}
+			return 0;
+		}
+		// polluter start polluting RSB
+		else if((argc == 2)&&(argv[1][0]=='1')){
+			printf("polluting rsb\n");
+			gadget();
+			return 0;
+		}
+		else{
+			printf("Invalid argument\n");
+			return -1;
+		}
+
 	}
-	printf("polluting rsb\n");
-	gadget();
+	else if(pid > 0){
+		// parent process;
+		sched_yield();
+		// access time to the array;
+		printf("secret found\n");
+		return 0;
+	}
+	else{
+		printf("fork error\n");
+		return -1;
+	}
 
 	// string buffer;
 	// char temp;
