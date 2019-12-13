@@ -3,10 +3,11 @@
 using namespace std;
 
 bool flag = false;
+int temp;
 
 void AddressAlignment(){
 	__asm__(
-		".rep 5347;"
+		".rep 20143;"
 		"nop;"
 		".endr;"
 	);
@@ -50,7 +51,9 @@ int main(int argc, char** argv){
 
 	while(true){
 		polluteLayer();
-		//AddressAlignment();
+		temp+=1;
 	}
+
+
 	return 0;
 }

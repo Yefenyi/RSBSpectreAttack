@@ -6,23 +6,16 @@ using namespace std;
 
 int secretKey = 80;
 
+int nonSecretKey = 0;
+
 char array[256*512];
 
 void AddressAlignment(){
 	__asm__(
-		".rep 5000;"
-		"nop;"
+		".rep 10000;"
+		"cpuid;"
 		".endr;"
 	);
-}
-
-volatile int foo(){
-	__asm__(
-		"clflush (%rsp);"
-		"clflush (%rip);"
-		"cpuid;"
-	);
-	return 0;
 }
 
 int main(){
@@ -37,28 +30,32 @@ int main(){
 	}
 
 	string secret = buffer;
-	temp &= array[secretKey]; // vulneralbility
+	temp &= array[secretKey*512]; // vulneralbility
 
-	unsigned int repeat = 1000, acc1 = 0, acc2 = 0, dummy;
+	unsigned int repeat = 100, acc1 = 0, acc2 = 0, dummy;
 	
 	for(int i=0; i<repeat; i++){
 
-		for(int i=0; i<16; i++){
-			foo();
+		for(int i=0; i<4; i++){
+			AddressAlignment();
+			temp &= i;
 		}
 
-		auto start = __rdtscp(&dummy);
-		temp &= array[secretKey];
-		auto end = __rdtscp(&dummy);
+		unsigned int start, end;
+
+		start = __rdtscp(&dummy);
+		temp &= array[secretKey*512];
+		end = __rdtscp(&dummy);
 		acc1 += end-start;
 
 		start = __rdtscp(&dummy);
-		temp &= array[0];
+		temp &= array[nonSecretKey*512];
 		end = __rdtscp(&dummy);
 		acc2 += end-start;
 
-		clflush((void*)(&array[secretKey]));
-		clflush((void*)(&array[0]));
+
+		clflush((void*)(&array[secretKey*512]));
+		clflush((void*)(&array[nonSecretKey*512]));
 	}
 
 	cout<<"average time on secret: "<<acc1/repeat<<endl;
