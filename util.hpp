@@ -5,6 +5,10 @@
 #include <time.h>
 #include <iostream>
 #include <x86intrin.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <fcntl.h>
+#include <signal.h>
 
 #ifndef UTIL_H_
 #define UTIL_H_

