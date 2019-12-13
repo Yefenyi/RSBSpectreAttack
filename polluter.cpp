@@ -2,9 +2,11 @@
 
 using namespace std;
 
+bool flag = false;
+
 void AddressAlignment(){
 	__asm__(
-		".rep 5434;"
+		".rep 5347;"
 		"nop;"
 		".endr;"
 	);
@@ -18,28 +20,36 @@ public:
 };
 
 int exceptionLayer(){
-	throw ReturnException();
+	if(flag){
+		throw ReturnException();
+	}
 	return 0;
 }
 
 int polluteLayer(){
-	exceptionLayer();
-	return 0;
-}
-
-int catchLayer(){
 	try{
-		polluteLayer();
+		exceptionLayer();
 	}catch(ReturnException& re){
 		return 1;
 	}
 	return 0; 
 }
 
-int main(){
-	cout<<"Start polluting RSB..."<<endl;
+int main(int argc, char** argv){
+	if((argc==2) && (argv[1][0]=='1')){
+		flag = true;
+		cout<<"Start polluting RSB..."<<endl;
+	}
+	else if((argc==2) && (argv[1][0]=='0')){
+		cout<<"Running without polluting RSB..."<<endl;
+	}
+	else{
+		cout<<"Invalid argument"<<endl;
+		return 1;
+	}
+
 	while(true){
-		catchLayer();
+		polluteLayer();
 		//AddressAlignment();
 	}
 	return 0;
