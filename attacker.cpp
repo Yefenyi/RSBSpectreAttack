@@ -38,6 +38,14 @@ using namespace std;
 // 	return 0;
 // }
 
+volatile void spacer() {
+	asm(
+		".rept 2197;"
+		"nop;"
+		".endr;"
+	);
+}
+
 void gadget() {
 	asm(
 		".rept 5;"
