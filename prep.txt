@@ -1,0 +1,7 @@
+Disable spectre protections in bootloader. Add the following to kernel parameters:
+nospectre_v1 nospectre_v2 nospec_store_bypass_disable pr_spec_disable_noexec
+
+Disable aslr:
+echo 0 > sudo tee /proc/sys/kernel/randomize_va_space
+
+Both of these changes will be reverted on system reboot.

