@@ -9,7 +9,7 @@
 using namespace std;
 
 char array[256*256];
-int total = 0;
+int total = 0, total2 = 0;
 
 volatile int foo(){
 	return 0;
@@ -59,14 +59,17 @@ void trickMe() {
 		);
 	
 		// timeAndFlush((ADDR_PTR)&array[secret]);
-		total += measure_one_block_access_time((ADDR_PTR)&array[secret]);
-		clflush((void *)&array[secret]);
+		total2 += measure_one_block_access_time((ADDR_PTR)&array[nonsecret]);
+		// total += measure_one_block_access_time((ADDR_PTR)&array[secret]);
+		clflush((void *)&array[nonsecret]);
+		// clflush((void *)&array[secret]);
 	}
 }
 
 volatile void spacer() {
 	asm(
 		".rept 1000;"
+		// ".rept 957;"
 		"nop;"
 		".endr;"
 	);
@@ -82,7 +85,8 @@ int main(){
 
 	trickMe();
 
-	printf("avg time is %f\n", total/1000.0);
+	printf("avg time for    secret is %f\n", total/1000.0);
+	printf("avg time for nonsecret is %f\n", total2/1000.0);
 
 	// for(int i = 0; i < 10000; i++) {
 	// 	printf("%u\n", times[i]);
