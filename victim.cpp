@@ -85,7 +85,8 @@ void trickMe() {
 volatile void spacer() {
 	asm(
 		// ".rept 1000;"
-		".rept 936;"
+		// ".rept 936;"
+		".rept 4880;"
 		"nop;"
 		".endr;"
 	);

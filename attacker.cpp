@@ -1,44 +1,12 @@
 #include "util.hpp"
 #include <iostream>
 #include <fstream>
+#include <sys/mman.h>
+#include <string.h>
 
 using namespace std;
 
 char array[256*256];
-
-// char array[256*256];
-
-// volatile int foo(){
-// 	return 0;
-// }
-
-// volatile int goo(){
-// 	__asm__(
-// 		".rept 564;"
-// 		"nop;"
-// 		".endr;"
-// 	);
-// }
-
-// volatile void gadget(){
-// 	__asm__(
-// 	"pop %rdi;"
-// 	"pop %rdi;"	
-// 	"pop %rdi;"
-// 	"pop %rdi;"
-// 	"nop;"
-// 	"pop %rbp;"
-// 	"clflush (%rsp);"
-// 	"clflush (%rip);"
-// 	"cpuid;"
-// 	"retq;");
-// }
-
-// int speculative(){
-// 	gadget();
-// 	int paceholder = 0;
-// 	return 0;
-// }
 
 volatile void spacer() {
 	asm(
@@ -63,34 +31,28 @@ int main(int argc, char *argv[]){
 		printf("doing nothing\n");
 		while(1) {}
 	}
-	printf("polluting rsb\n");
-	gadget();
+	// printf("polluting rsb\n");
+	// gadget();
 
-	// string buffer;
-	// char temp;
-	// volatile int i = 0;
+	ADDR_PTR start = 0x0000555555556000;
 
-	// temp &= array[0];
-	// temp &= array[80];
-	// temp &= array[200];
+	void *ptr = mmap((void *)start,
+		4096,
+		PROT_READ|PROT_EXEC|PROT_WRITE,
+		MAP_ANONYMOUS|MAP_SHARED,
+		-1,
+		0);
 
-	// speculative();
+	if (ptr == MAP_FAILED) {
+		printf("mmap failed: %s\n", strerror(errno));
+		return 0;
+	}
 
-	// unsigned int dummy;
-	// auto t1 = __rdtscp(&dummy);
-	// temp &= array[0];
-	// auto t2 = __rdtscp(&dummy);
-	// cout<<t2-t1<<endl;
+	printf("ptr is %p\n", ptr);
 
-	// auto t3 = __rdtscp(&dummy);
-	// temp &= array[80];
-	// auto t4 = __rdtscp(&dummy);
-	// cout<<t4-t3<<endl;
+	ptr = memcpy(ptr, (void *)&gadget, 32);
 
-	// auto t5 = __rdtscp(&dummy);
-	// temp &= array[200];
-	// auto t6 = __rdtscp(&dummy);
-	// cout<<t6-t5<<endl;
+	((int (*)())ptr)();
 
-	// return 0;
+	return 0;
 }
