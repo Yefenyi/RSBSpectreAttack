@@ -42,9 +42,7 @@ char array[256*256];
 
 volatile void spacer() {
 	asm(
-		// ".rept 2235;"
-		".rept 2215;"
-		// ".rept 2062;"
+		".rept 2445;"
 		"nop;"
 		".endr;"
 	);

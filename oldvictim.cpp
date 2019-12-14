@@ -36,7 +36,7 @@ void trickMe() {
 
 	for (int i = 0; i<10000;i++) {
 		// deepCallStack(16);
-		//sched_yield();
+		sched_yield();
 		asm(
 			retAsm(1)
 			retAsm(2)
