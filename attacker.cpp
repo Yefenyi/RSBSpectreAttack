@@ -44,6 +44,7 @@ volatile void spacer() {
 	asm(
 		// ".rept 2235;"
 		".rept 2215;"
+		// ".rept 2062;"
 		"nop;"
 		".endr;"
 	);
