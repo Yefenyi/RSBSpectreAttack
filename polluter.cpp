@@ -50,9 +50,11 @@ int main()
     /* memory map the shared memory object */
     ptr = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0); 
 
-    temp &= ptr[0];
-    printAccessTime(ADDR_PTR(&ptr[1024]));
-
+    while(1) {
+        int timeFlushed = measure_one_block_access_time(ADDR_PTR(&ptr[0]));
+        int timeUnflushed = measure_one_block_access_time(ADDR_PTR(&ptr[4096]));
+        printf("time flushed is: %d, time unflushed is: %d\n", timeFlushed, timeUnflushed);
+    }
      
     return 0; 
 } 

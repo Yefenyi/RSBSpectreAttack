@@ -28,32 +28,35 @@ volatile void spacer2() {
 	);
 }
 
+void exploit();
+
 void trickMe() {
 	// while(1) {
 	ADDR_PTR address, tmp;
 
 	while(1) {
 		sched_yield();
-		asm(
-			retAsm(1)
-			retAsm(2)
-			retAsm(3)
-			retAsm(4)
-			retAsm(5)
-			retAsm(6)
-			retAsm(7)
-			retAsm(8)
-			retAsm(9)
-			retAsm(10)
-			retAsm(11)
-			retAsm(12)
-			retAsm(13)
-			retAsm(14)
-			retAsm(15)
-			retAsm(16)
-			: "=r" (tmp)
-			: "r" (address)
-		);
+		exploit();
+		// asm(
+		// 	retAsm(1)
+		// 	retAsm(2)
+		// 	retAsm(3)
+		// 	retAsm(4)
+		// 	retAsm(5)
+		// 	retAsm(6)
+		// 	retAsm(7)
+		// 	retAsm(8)
+		// 	retAsm(9)
+		// 	retAsm(10)
+		// 	retAsm(11)
+		// 	retAsm(12)
+		// 	retAsm(13)
+		// 	retAsm(14)
+		// 	retAsm(15)
+		// 	retAsm(16)
+		// 	: "=r" (tmp)
+		// 	: "r" (address)
+		// );
 	}
 }
 
@@ -68,7 +71,9 @@ volatile void spacer() {
 
 void exploit() { 
 	// this should be at the same VA as attacker:gadget()
-	volatile int temp = array[secret*offset];
+	// volatile int temp = array[secret*offset];
+	// volatile int temp = array[secret*offset];
+	clflush((void*)(&array[secret*offset]));
 }
 
 int main(){
@@ -93,6 +98,8 @@ int main(){
 	printf("Your secret is: %d\n", secret);
 	
 	printf("Running victim code...\n");
+	// array[secret*offset] = 'Q';
+	// printf("VA of secret is %p\n", (void *)&array[secret*offset]);
 	trickMe();
 
 	return 0;

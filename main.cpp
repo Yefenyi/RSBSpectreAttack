@@ -50,9 +50,9 @@ int main()
     /* memory map the shared memory object */
     ptr = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0); 
 
-    for(int i=0; i<100; i++){
-    	printf("%d\n",ptr[i]);
+    while(1) {
+        clflush((void *)(&ptr[0]));
     }
      
-    return 0; 
+    return 0;
 } 

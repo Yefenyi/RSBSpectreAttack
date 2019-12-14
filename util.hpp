@@ -19,9 +19,9 @@
 
 #define lowerBound 0
 #define upperBound 9
-#define offset 512
-#define sleepTime 1
-#define nAttackRepeat 10
+#define offset 1024
+#define sleepTime 0.5
+#define nAttackRepeat 20
 #define INT_MAX 2147483647
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
