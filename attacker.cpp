@@ -65,12 +65,12 @@ int main(int argc, char *argv[]){
 	// loads the entire array
 
 	if(pid == 0){
+		// child process
 		auto cpu = sched_getcpu();
 		printf("RSB pollution on core: %d\n", cpu);
-		// child process
 		// doing nothing, just for comparison
 		if ((argc == 2)&&(argv[1][0]=='0')) {
-			printf("Doing nothing...\n");
+			printf("doing nothing\n");
 			while(1) {}
 			return 0;
 		}
@@ -97,6 +97,7 @@ int main(int argc, char *argv[]){
 		sleep(1);
 		//access time to the array;
 		kill(pid, SIGKILL);
+		printf("RSB pollution ended\n");
 		// printf("secret found\n");
 		return 0;
 	}
