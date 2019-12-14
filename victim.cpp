@@ -3,9 +3,6 @@
 #include <fstream>
 #include <unistd.h>
 #include <sched.h>
-#define secret 1232
-#define secret2 13427
-#define nonsecret 21142
 
 using namespace std;
 
