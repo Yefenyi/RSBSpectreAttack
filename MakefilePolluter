@@ -2,7 +2,7 @@ CFLAGS=-std=c++11 -I /usr/local -g -pthread
 CC=g++
 
 
-TARGETS=victim
+TARGETS=polluter
 UTILS=util.o 
 
 all: $(TARGETS)

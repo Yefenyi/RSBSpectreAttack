@@ -14,7 +14,7 @@ $(UTILS): %.o: %.cpp %.hpp
 	$(CC) $(CFLAGS)  -c $< 
 
 
-$(TARGETS): %:%.o util.o
+$(TARGETS): %:%.o util.o -lrt
 	$(CC) $(CFLAGS) $^ -o $@
 
 

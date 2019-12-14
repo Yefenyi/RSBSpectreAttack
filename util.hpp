@@ -9,12 +9,20 @@
 #include <semaphore.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <sys/mman.h>
 
 #ifndef UTIL_H_
 #define UTIL_H_
 
 #define ADDR_PTR uint64_t 
 #define CYCLES uint32_t
+
+#define lowerBound 0
+#define upperBound 9
+#define offset 512
+#define sleepTime 1
+#define nAttackRepeat 10
+#define INT_MAX 2147483647
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 CYCLES rdtsc();

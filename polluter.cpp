@@ -8,7 +8,7 @@ using namespace std;
   
 int main() 
 { 
-   // ftok to generate unique key 
+    // ftok to generate unique key 
     // key_t key = ftok("shmfile",65); 
   
     // // shmget returns an identifier in shmid 
@@ -50,9 +50,9 @@ int main()
     /* memory map the shared memory object */
     ptr = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0); 
 
-    for(int i=0; i<100; i++){
-    	printf("%d\n",ptr[i]);
-    }
+    temp &= ptr[0];
+    printAccessTime(ADDR_PTR(&ptr[1024]));
+
      
     return 0; 
 } 
