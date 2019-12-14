@@ -43,7 +43,7 @@ char array[256*256];
 volatile void spacer() {
 	asm(
 		// ".rept 2235;"
-		".rept 2215;"
+		".rept 1671;"
 		"nop;"
 		".endr;"
 	);
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]){
 		CPU_SET(cpu, &mask);
 		auto result = sched_setaffinity(pid, sizeof(mask), &mask);
 		// parent process;
-		sleep(1);
+		sleep(60);
 		//access time to the array;
 		kill(pid, SIGKILL);
 		printf("RSB pollution ended\n");
