@@ -5,6 +5,8 @@
 #include <time.h>
 #include <iostream>
 #include <x86intrin.h>
+#include <sys/mman.h>
+#include <string.h>
 
 #ifndef UTIL_H_
 #define UTIL_H_
@@ -16,5 +18,7 @@ CYCLES measure_one_block_access_time(ADDR_PTR addr);
 CYCLES rdtsc();
 volatile void clflush(void *p);
 void printAccessTime(ADDR_PTR addr);
+void* copyFunction(ADDR_PTR startAddr, void *fnAddr);
+int unmap(ADDR_PTR startAddr);
 
 #endif

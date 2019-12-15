@@ -9,18 +9,22 @@ using namespace std;
 void callLoop();
 
 int main(){
-	callLoop();
+	ADDR_PTR addr = 0x0000555555565000;
+	addr = (ADDR_PTR)copyFunction(addr, (void *)&callLoop);
+
+	// callLoop();
+	((void (*)())addr)();
 
 	return 0;
 }
 
-volatile void spacer() {
-	asm(
-		".rept 4880;"
-		"nop;"
-		".endr;"
-	);
-}
+// volatile void spacer() {
+// 	asm(
+// 		".rept 4880;"
+// 		"nop;"
+// 		".endr;"
+// 	);
+// }
 
 void callLoop() {
 	asm(

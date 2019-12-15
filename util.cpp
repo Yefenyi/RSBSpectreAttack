@@ -35,3 +35,34 @@ void printAccessTime(ADDR_PTR addr) {
 	printf("%u\n",  
 		measure_one_block_access_time(addr));
 }
+
+void* copyFunction(ADDR_PTR startAddr, void *fnAddr) {
+	void *ptr = mmap(
+		(void *)startAddr,
+		4096,
+		PROT_READ|PROT_EXEC|PROT_WRITE,
+		MAP_ANONYMOUS|MAP_PRIVATE,
+		-1,
+		0);
+
+	if (ptr == MAP_FAILED) {
+		printf("mmap failed: %s\n", strerror(errno));
+		return NULL;
+	}
+
+	// printf("ptr is %p\n", ptr);
+
+	ptr = memcpy(ptr, fnAddr, 1000);
+
+	return ptr;
+}
+
+int unmap(ADDR_PTR addr) {
+	int result = munmap((void *)(addr & ~(4096-1)), 4096);
+
+	if (result == -1) {
+		printf("munmap failed: %s\n", strerror(errno));
+	}
+
+	return result;
+}
