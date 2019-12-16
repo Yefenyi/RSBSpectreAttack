@@ -5,3 +5,7 @@ Disable aslr:
 echo 0 > sudo tee /proc/sys/kernel/randomize_va_space
 
 Both of these changes will be reverted on system reboot.
+
+Disable ASLR for a specific program:
+run "setarch `uname -m` --addr-no-randomize /bin/bash" to open a new shell.
+Programs in this shell will not use ASLR.

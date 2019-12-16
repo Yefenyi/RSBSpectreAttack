@@ -41,7 +41,7 @@ void* largeMap(void *startAddr) {
 }
 
 void* map(void *startAddr, size_t size) {
-	printf("size is %lu\n", size);
+	// printf("size is %lu\n", size);
 
 	// printf("addr is %lu\n", ADDR_PTR(startAddr));
 	// ADDR_PTR tmp = ADDR_PTR(startAddr);
@@ -49,7 +49,7 @@ void* map(void *startAddr, size_t size) {
 
 	void *ptr = mmap(
 		// startAddr,
-		(void *)((ADDR_PTR(startAddr) & ~(4096-1))+4096),
+		(void *)((ADDR_PTR(startAddr) & ~(4096-1))),
 		size,
 		// 4096,
 		PROT_READ|PROT_EXEC|PROT_WRITE,

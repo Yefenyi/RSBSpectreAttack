@@ -14,7 +14,8 @@
 #define ADDR_PTR uint64_t 
 #define CYCLES uint32_t
 
-#define largeMapSize 1<<20
+// #define largeMapSize 1<<20
+#define largeMapSize 1<<22
 
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 CYCLES rdtsc();
