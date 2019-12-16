@@ -15,11 +15,13 @@ void callLoop() {
 }
 
 int main(){
-	void *requestedAddr = (void *)0x0000555555565000;
+	void *requestedAddr = (void *)0x0000555555647000;
 	printf("requesting memory at %p\n", requestedAddr);
-	void *newFunc = map(requestedAddr, 1024);
+	void *newFunc = map((void *)((ADDR_PTR)requestedAddr-4096), 1024);
 	printf("starting address is %p\n", newFunc);
 	memcpy(newFunc, (void *)&callLoop, 1024);
+
+	printf("function is running at virtual address %p.\n", newFunc);
 
 	// callLoop();
 	((void (*)())newFunc)();

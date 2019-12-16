@@ -65,8 +65,8 @@ void* map(void *startAddr, size_t size) {
 	return ptr;
 }
 
-int unmap(ADDR_PTR addr) {
-	int result = munmap((void *)(addr & ~(4096-1)), 4096);
+int unmap(void *addr) {
+	int result = munmap(addr, largeMapSize);
 
 	if (result == -1) {
 		printf("munmap failed: %s\n", strerror(errno));

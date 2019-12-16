@@ -22,6 +22,6 @@ volatile void clflush(void *p);
 void printAccessTime(ADDR_PTR addr);
 void* largeMap(void *startAddr);
 void* map(void *startAddr, size_t size);
-int unmap(ADDR_PTR startAddr);
+int unmap(void *startAddr);
 
 #endif
