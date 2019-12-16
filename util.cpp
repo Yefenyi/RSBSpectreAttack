@@ -36,12 +36,24 @@ void printAccessTime(ADDR_PTR addr) {
 		measure_one_block_access_time(addr));
 }
 
-void* copyFunction(ADDR_PTR startAddr, void *fnAddr) {
+void* largeMap(void *startAddr) {
+	return map(startAddr, largeMapSize);
+}
+
+void* map(void *startAddr, size_t size) {
+	printf("size is %lu\n", size);
+
+	// printf("addr is %lu\n", ADDR_PTR(startAddr));
+	// ADDR_PTR tmp = ADDR_PTR(startAddr);
+	// printf("actual request is %p\n", (void *)(tmp & ~(4096-1)));
+
 	void *ptr = mmap(
-		(void *)startAddr,
-		4096,
+		// startAddr,
+		(void *)((ADDR_PTR(startAddr) & ~(4096-1))+4096),
+		size,
+		// 4096,
 		PROT_READ|PROT_EXEC|PROT_WRITE,
-		MAP_ANONYMOUS|MAP_PRIVATE,
+		MAP_ANONYMOUS|MAP_PRIVATE|MAP_FIXED,
 		-1,
 		0);
 
@@ -49,10 +61,6 @@ void* copyFunction(ADDR_PTR startAddr, void *fnAddr) {
 		printf("mmap failed: %s\n", strerror(errno));
 		return NULL;
 	}
-
-	// printf("ptr is %p\n", ptr);
-
-	ptr = memcpy(ptr, fnAddr, 1000);
 
 	return ptr;
 }

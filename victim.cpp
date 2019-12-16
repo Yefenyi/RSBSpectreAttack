@@ -6,14 +6,23 @@
 
 using namespace std;
 
-void callLoop();
+void callLoop() {
+	asm(
+		"lbl:"
+		"pop %rax;"
+		"call lbl;"
+	);
+}
 
 int main(){
-	ADDR_PTR addr = 0x0000555555565000;
-	addr = (ADDR_PTR)copyFunction(addr, (void *)&callLoop);
+	void *requestedAddr = (void *)0x0000555555565000;
+	printf("requesting memory at %p\n", requestedAddr);
+	void *newFunc = map(requestedAddr, 1024);
+	printf("starting address is %p\n", newFunc);
+	memcpy(newFunc, (void *)&callLoop, 1024);
 
 	// callLoop();
-	((void (*)())addr)();
+	((void (*)())newFunc)();
 
 	return 0;
 }
@@ -25,11 +34,3 @@ int main(){
 // 		".endr;"
 // 	);
 // }
-
-void callLoop() {
-	asm(
-		"lbl:"
-		"pop %rax;"
-		"call lbl;"
-	);
-}

@@ -14,11 +14,14 @@
 #define ADDR_PTR uint64_t 
 #define CYCLES uint32_t
 
+#define largeMapSize 1<<20
+
 CYCLES measure_one_block_access_time(ADDR_PTR addr);
 CYCLES rdtsc();
 volatile void clflush(void *p);
 void printAccessTime(ADDR_PTR addr);
-void* copyFunction(ADDR_PTR startAddr, void *fnAddr);
+void* largeMap(void *startAddr);
+void* map(void *startAddr, size_t size);
 int unmap(ADDR_PTR startAddr);
 
 #endif
