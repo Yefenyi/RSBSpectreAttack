@@ -1,7 +1,7 @@
 CFLAGS=-std=c++11 -I /usr/local -g -Wno-pointer-arith
 CC=g++
 
-TARGETS=attacker victim single-process cross-process-attacker cross-process-victim
+TARGETS=aslr-attacker aslr-victim single-process cross-process-attacker cross-process-victim
 UTILS=util.o 
 
 all: $(TARGETS)
