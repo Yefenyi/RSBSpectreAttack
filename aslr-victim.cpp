@@ -26,8 +26,6 @@ void callLoop() {
 int main(int argc, char *argv[]){
 	// Mode 1: choose a random starting address (simulating ASLR) and attacker guesses it.
 	if (argc == 1) {
-		
-
 		void *requestedAddr = (void *)0x0000555555587000;
 		printf("requesting memory at %p\n", requestedAddr);
 		void *newFunc = map((void *)((ADDR_PTR)requestedAddr-4096), 1024);
