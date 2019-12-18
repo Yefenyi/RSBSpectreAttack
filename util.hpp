@@ -19,7 +19,6 @@
 
 #define lowerBound 0
 #define upperBound 9
-#define offset 3333
 #define sleepTime 1
 #define nAttackRepeat 10
 #define INT_MAX 2147483647

