@@ -67,7 +67,8 @@ int main(){
 
 	measureSpeculation();
 
-	printf("avg time for secret is %i\n", total/iterations);
-	printf("avg time for non-secret is %i\n", total2/iterations);
+	printf("If secret is being speculatively accessed, it will have a lower access time.");
+	printf("Avg time for secret: %i\n", total/iterations);
+	printf("Avg time for non-secret: %i\n", total2/iterations);
 	return 0;
 }
