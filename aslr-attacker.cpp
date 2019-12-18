@@ -153,6 +153,7 @@ int main(int argc, char *argv[]){
 	// Memory load occurs 4 bytes after the function pointer.
 	loadMemoryPtr = (void *)((ADDR_PTR)&loadMemory+4);
 
+	// This starting address should be modified to match the first few bits of the victim's address.
 	startAddr = (void *)0x564020000000;
 	endAddr = getEndAddr(startAddr);
 	largeMap(startAddr);
