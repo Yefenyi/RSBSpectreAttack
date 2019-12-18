@@ -19,4 +19,4 @@ $(TARGETS): %:%.o util.o
 .PHONY:	clean
 
 clean:
-	rm *.o $(HELPERS) $(TARGETS) 
+	rm -f *.o $(HELPERS) $(TARGETS) 
